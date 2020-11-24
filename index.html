@@ -71,9 +71,19 @@
 </html>
 
 <script>
- let correct = 0;
-let wrongCount = 12;
-let wins = 0;
+class SingletonState {
+  constructor(correct,wrongCount) {
+    this.correct = correct;
+    this.wrongCount = wrongCount;
+    SingletonState.instance = this;
+  }
+  static getInstance() {
+    if(!SingletonState.instance) {
+        SingletonState.instance = new SingletonState(0,12);
+    }
+    return SingletonState.instance;
+}
+}
 
 // Creates a new game
 document.getElementById('newGame_button').onclick = function(){
@@ -82,49 +92,39 @@ document.getElementById('newGame_button').onclick = function(){
   $('.btn-light').prop('disabled',false);
   var buttons = document.getElementsByClassName('btn-light');
   for(button of buttons){button.style.background = "white";}
-  correct = 0;
-  wrongCount = 7;
-  word.getWord();
+ // correct = 0;
+  //wrongCount = 7;
+  getWord();
 };
 
-class Singleton {
-  constructor() {
-    if(Singleton.instance instanceof Singleton) {
-      return Singleton.instance;
-    }
-   
-    Object.freeze(this);
-    Singleton.instance = this;
-  }
- 
-  getWord() {
-    let xhr = new XMLHttpRequest();
-    const key = "ab0d5274c4e036127a40d059f3c06ea27056d56b0e0300d75" // API key goes here
-    const url = "https://api.wordnik.com/v4/words.json/randomWord?hasDictionaryDef=true&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=-1&api_key="+key;
-    xhr.open('GET',url,true);
-  
-    xhr.onload = function(){
-      if(this.status == 200){
-        let data = JSON.parse(this.responseText);
-        if(checkWord(data["word"])){
-          playGame(data["word"]);
-        } else {
-          getWord();
-        }
-      }
-      else {
-        console.log("Connection Error");
+
+// Gets the word that the user will guess
+function getWord(){
+  let xhr = new XMLHttpRequest();
+  const key = "ab0d5274c4e036127a40d059f3c06ea27056d56b0e0300d75" // API key goes here
+  const url = "https://api.wordnik.com/v4/words.json/randomWord?hasDictionaryDef=true&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=-1&api_key="+key;
+  xhr.open('GET',url,true);
+
+  xhr.onload = function(){
+    if(this.status == 200){
+      let data = JSON.parse(this.responseText);
+      if(checkWord(data["word"])){
+        playGame(data["word"]);
+      } else {
+        getWord();
       }
     }
-    xhr.send();
+    else {
+      console.log("Connection Error");
+    }
   }
+  xhr.send();
 }
-const word = new Singleton();
-// const word2 = new Singleton();
-// Go to console and type word === word2 to check if they are the same.
+
 // The game being played
 function playGame(word){
-  document.getElementById('panel_1').innerHTML = `<h1>${wrongCount}</h1>`;
+  const state = SingletonState.getInstance();
+  document.getElementById('panel_1').innerHTML = `<h1>${state.wrongCount}</h1>`;
   let wordArray = word.toUpperCase().split("");
   let guessArray = [];
   for(let i in word){
@@ -141,11 +141,11 @@ function playGame(word){
         this.style.background = "aqua";
       } else {
         this.style.background = "red";
-        wrongCount--;
+        state.wrongCount--;
       }
-      document.getElementById('panel_1').innerHTML = `<h1>${wrongCount}</h1>`;
-      if(correct == wordArray.length){endGame(true, word);}
-      else if(wrongCount <= 0) {endGame(false, word);}
+      document.getElementById('panel_1').innerHTML = `<h1>${state.wrongCount}</h1>`;
+      if(state.correct == wordArray.length){endGame(true, word);}
+      else if(state.wrongCount <= 0) {endGame(false, word);}
     }
   }
 }
@@ -162,10 +162,11 @@ function checkWord(word){
 
 // Checks if the guessed letter is in the word
 function checkGuess(guess, wordArray, guessArray){
+  const state = SingletonState.getInstance();
   for(let i in wordArray){
     if(wordArray[i] == guess){
       guessArray[i] = guess;
-      correct++;
+      state.correct++;
     }
   }
   setGuess(guessArray);
