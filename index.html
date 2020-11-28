@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -9,7 +10,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 </head>
 
-<body onload="word.getWord()">
+<body onload="getWord()">
   <div id="header">
     <h1 style="float:left;">Hangman</h1>
     <h2 id="winCount" style="float:right;">Games Won: 0</h2>
@@ -63,24 +64,21 @@
   </div>
 
 
-  <script src="main.js"></script>
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
-</body>
-</html>
+
 
 <script>
-  // singleton class
+   //let correct = 0;
+let wins = 0;
+//singleton class
 class SingletonState {
-  constructor(correct,wrongCount) {
-    this.correct = correct;
+  constructor(wrongCount, correct) {
     this.wrongCount = wrongCount;
+    this.correc = correct;
     SingletonState.instance = this;
   }
   static getInstance() {
     if(!SingletonState.instance) {
-        SingletonState.instance = new SingletonState(0,12);
+        SingletonState.instance = new SingletonState(7,0);
     }
     return SingletonState.instance;
 }
@@ -88,13 +86,14 @@ class SingletonState {
 
 // Creates a new game
 document.getElementById('newGame_button').onclick = function(){
+    const state = SingletonState.getInstance();
   document.getElementById("newGame").setAttribute('hidden',true);
   document.getElementById('guessString').style.color = "#18EA7E";
   $('.btn-light').prop('disabled',false);
   var buttons = document.getElementsByClassName('btn-light');
   for(button of buttons){button.style.background = "white";}
- // correct = 0;
-  //wrongCount = 7;
+  state.correct = 0;
+  state.wrongCount = 7;
   getWord();
 };
 
@@ -124,7 +123,7 @@ function getWord(){
 
 // The game being played
 function playGame(word){
-  const state = SingletonState.getInstance();
+    const state = SingletonState.getInstance();
   document.getElementById('panel_1').innerHTML = `<h1>${state.wrongCount}</h1>`;
   let wordArray = word.toUpperCase().split("");
   let guessArray = [];
@@ -145,8 +144,12 @@ function playGame(word){
         state.wrongCount--;
       }
       document.getElementById('panel_1').innerHTML = `<h1>${state.wrongCount}</h1>`;
-      if(state.correct == wordArray.length){endGame(true, word);}
-      else if(state.wrongCount <= 0) {endGame(false, word);}
+      if(state.correct == wordArray.length){
+          endGame(true, word);
+          }
+     
+      else if(state.wrongCount <= 0) {
+          endGame(false, word);}
     }
   }
 }
@@ -163,7 +166,7 @@ function checkWord(word){
 
 // Checks if the guessed letter is in the word
 function checkGuess(guess, wordArray, guessArray){
-  const state = SingletonState.getInstance();
+    const state = SingletonState.getInstance();
   for(let i in wordArray){
     if(wordArray[i] == guess){
       guessArray[i] = guess;
@@ -195,8 +198,6 @@ function endGame(result, word){
 }
 
 </script>
-
-  <script src="main.js"></script>
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
